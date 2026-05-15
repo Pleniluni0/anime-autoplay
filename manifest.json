@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "Anime AutoPlay",
+  "version": "6.1.0",
+  "description": "Autoplay para AnimeAV1, AnimeFLV, SeriesDonghua, MundoDonghua y DonghuaLife.",
+  "permissions": ["storage"],
+  "host_permissions": ["*://*/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.animeav1.com/*",    "*://animeav1.com/*",
+        "*://*.animeflv.net/*",    "*://animeflv.net/*",
+        "*://www4.animeflv.net/*", "*://www3.animeflv.net/*",
+        "*://www2.animeflv.net/*", "*://www.animeflv.net/*",
+        "*://*.seriesdonghua.com/*", "*://seriesdonghua.com/*",
+        "*://*.mundodonghua.com/*",  "*://mundodonghua.com/*",
+        "*://*.donghualife.com/*",   "*://donghualife.com/*"
+      ],
+      "js": ["main.js"],
+      "run_at": "document_end",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "*://*.seriesdonghua.com/player.php*",
+        "*://seriesdonghua.com/player.php*",
+        "*://*.mdnemonicplayer.xyz/*",
+        "*://mdnemonicplayer.xyz/*",
+        "*://*.mundodonghua.com/player*",
+        "*://mundodonghua.com/player*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": ["*://*/*"],
+      "js": ["player.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Anime AutoPlay",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime AutoPlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family:'Sora',sans-serif;
+      background:#0f111a;
+      color:#e8eaf0;
+      width:300px;
+      overflow:hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background:linear-gradient(135deg,rgba(0,188,164,0.15),rgba(0,188,164,0.04));
+      border-bottom:1px solid rgba(0,188,164,0.18);
+      padding:14px 18px 12px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .logo {
+      width:32px; height:32px; background:#00BCA4;
+      border-radius:8px; display:flex; align-items:center;
+      justify-content:center; font-size:16px; flex-shrink:0;
+    }
+    .header-text { flex:1; }
+    .header-text h1 { font-size:13px; font-weight:700; color:#fff; }
+    .header-text p  { font-size:10px; color:rgba(255,255,255,0.4); margin-top:1px; }
+    .help-btn {
+      width:28px; height:28px; border-radius:50%;
+      background:rgba(255,255,255,0.07); border:none;
+      color:rgba(255,255,255,0.5); font-size:14px; font-weight:700;
+      cursor:pointer; flex-shrink:0; transition:all 0.2s;
+      font-family:'Sora',sans-serif;
+    }
+    .help-btn:hover { background:rgba(0,188,164,0.2); color:#00BCA4; }
+
+    /* ── Screens ── */
+    #screen-main, #screen-help { display:flex; flex-direction:column; }
+    #screen-help { display:none; }
+
+    .content { padding:14px 18px; display:flex; flex-direction:column; gap:12px; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size:10px; font-weight:700; letter-spacing:0.1em;
+      text-transform:uppercase; color:rgba(255,255,255,0.25);
+      padding-top:2px;
+    }
+
+    /* Toggle */
+    .row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .row-info label { font-size:13px; font-weight:600; color:#e8eaf0; display:block; }
+    .row-info span  { font-size:11px; color:rgba(255,255,255,0.4); margin-top:1px; display:block; }
+    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; cursor:pointer; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .slider {
+      position:absolute; cursor:pointer; inset:0;
+      background:rgba(255,255,255,0.1); border-radius:24px; transition:0.25s;
+    }
+    .slider::before {
+      content:''; position:absolute;
+      width:18px; height:18px; left:3px; top:3px;
+      background:rgba(255,255,255,0.5); border-radius:50%; transition:0.25s;
+    }
+    input:checked + .slider { background:#00BCA4; }
+    input:checked + .slider::before { transform:translateX(20px); background:#0f111a; }
+
+    /* Range sliders */
+    .slider-row { display:flex; flex-direction:column; gap:8px; }
+    .slider-header { display:flex; justify-content:space-between; align-items:flex-start; }
+    .slider-val { font-size:20px; font-weight:700; color:#00BCA4; line-height:1; text-align:right; }
+    .slider-unit { font-size:9px; color:rgba(255,255,255,0.3); display:block; margin-top:2px; text-align:right; }
+    input[type="range"] {
+      width:100%; -webkit-appearance:none; height:4px;
+      background:rgba(255,255,255,0.1); border-radius:4px; outline:none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:16px; height:16px;
+      border-radius:50%; background:#00BCA4; cursor:pointer;
+      box-shadow:0 0 8px rgba(0,188,164,0.4);
+    }
+    .note { font-size:10px; color:rgba(255,255,255,0.35); text-align:center; margin-top:-4px; min-height:14px; transition:color 0.2s; }
+    .note.active { color:#00BCA4; }
+
+    /* Intro */
+    .time-inputs { display:flex; align-items:center; gap:8px; }
+    .time-field { display:flex; flex-direction:column; gap:4px; flex:1; }
+    .time-field label { font-size:10px; color:rgba(255,255,255,0.35); font-weight:600; letter-spacing:0.05em; }
+    .time-field input[type="text"] {
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      border-radius:7px; color:#e8eaf0; font-family:'Sora',monospace;
+      font-size:15px; font-weight:700; text-align:center;
+      padding:7px 4px; width:100%; outline:none; transition:border-color 0.2s;
+    }
+    .time-field input[type="text"]:focus { border-color:rgba(0,188,164,0.5); }
+    .time-field input[type="text"].valid { border-color:rgba(0,188,164,0.4); color:#00BCA4; }
+    .time-field input[type="text"].error { border-color:rgba(255,80,80,0.5); color:rgba(255,130,130,0.9); }
+    .time-arrow { font-size:16px; color:rgba(255,255,255,0.2); margin-top:18px; flex-shrink:0; }
+    .mode-pills { display:flex; gap:6px; }
+    .pill {
+      flex:1; text-align:center; padding:6px 8px; border-radius:7px; cursor:pointer;
+      font-size:11px; font-weight:700; letter-spacing:0.03em;
+      border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05);
+      color:rgba(255,255,255,0.4); transition:all 0.18s; user-select:none;
+    }
+    .pill.active { background:#00BCA4; color:#061212; border-color:#00BCA4; }
+    .intro-preview { font-size:10px; color:rgba(255,255,255,0.35); text-align:center; min-height:14px; transition:color 0.2s; }
+    .intro-preview.active { color:#00BCA4; }
+
+    .divider { height:1px; background:rgba(255,255,255,0.06); }
+
+    .status { text-align:center; font-size:11px; color:rgba(255,255,255,0.3); padding-bottom:2px; }
+    .status strong { color:#00BCA4; }
+    .disabled-section { opacity:0.35; pointer-events:none; }
+
+    /* ── Help screen ── */
+    .help-content {
+      padding:16px 18px 18px;
+      display:flex; flex-direction:column; gap:14px;
+      max-height:420px; overflow-y:auto;
+    }
+    .help-back {
+      display:flex; align-items:center; gap:8px;
+      background:none; border:none; color:rgba(255,255,255,0.5);
+      font-family:'Sora',sans-serif; font-size:12px; font-weight:600;
+      cursor:pointer; padding:0; transition:color 0.2s;
+    }
+    .help-back:hover { color:#00BCA4; }
+    .help-section { display:flex; flex-direction:column; gap:6px; }
+    .help-title {
+      font-size:11px; font-weight:700; color:#00BCA4;
+      letter-spacing:0.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:6px;
+    }
+    .help-title::before {
+      content:''; display:block; width:3px; height:12px;
+      background:#00BCA4; border-radius:2px; flex-shrink:0;
+    }
+    .help-text {
+      font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6;
+    }
+    .help-text b { color:rgba(255,255,255,0.85); font-weight:600; }
+    .help-tip {
+      background:rgba(0,188,164,0.07); border:1px solid rgba(0,188,164,0.15);
+      border-radius:8px; padding:10px 12px;
+      font-size:10px; color:rgba(255,255,255,0.5); line-height:1.6;
+    }
+    .help-tip b { color:#00BCA4; }
+    .sites-list {
+      display:flex; flex-wrap:wrap; gap:5px; margin-top:2px;
+    }
+    .site-tag {
+      background:rgba(255,255,255,0.07); border-radius:5px;
+      padding:3px 8px; font-size:10px; color:rgba(255,255,255,0.5);
+      font-weight:600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER (compartido) ── -->
+  <div class="header">
+    <div class="logo">▶</div>
+    <div class="header-text">
+      <h1>Anime AutoPlay</h1>
+      <p>AV1 · FLV · SDonghua · Mundo · DLife</p>
+    </div>
+    <button class="help-btn" id="help-toggle" title="Ayuda">?</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANTALLA PRINCIPAL                         -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="screen-main">
+    <div class="content">
+
+      <!-- Autoplay toggle -->
+      <div class="row">
+        <div class="row-info">
+          <label>Reproducción automática</label>
+          <span>Pasar al siguiente episodio</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoplay-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Siguiente episodio -->
+      <div class="section-label">Siguiente episodio</div>
+
+      <div class="row">
+        <div class="row-info">
+          <label>Recordar reproductor</label>
+          <span>Usa el mismo servidor al pasar</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="remember-player-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div class="row-info">
+          <label>Pantalla completa automática</label>
+          <span>Al pasar al episodio siguiente</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autofs-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Countdown -->
+      <div class="slider-row" id="section-countdown">
+        <div class="slider-header">
+          <div class="row-info">
+            <label>Cuenta atrás</label>
+            <span>Tiempo antes de pasar</span>
+          </div>
+          <div>
+            <div class="slider-val" id="countdown-display">5</div>
+            <div class="slider-unit">segundos</div>
+          </div>
+        </div>
+        <input type="range" id="countdown-slider" min="3" max="15" value="5" step="1">
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Intro skip -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="row">
+          <div class="row-info">
+            <label>Saltar intro / opening</label>
+            <span>Salta al instante configurado</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="intro-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div id="intro-body" class="disabled-section">
+          <div class="mode-pills">
+            <div class="pill" id="pill-manual">✋ Manual</div>
+            <div class="pill" id="pill-auto">⚡ Automático</div>
+          </div>
+          <div class="time-inputs" style="margin-top:8px">
+            <div class="time-field">
+              <label>DESDE</label>
+              <input type="text" id="intro-from" placeholder="0:00" maxlength="7">
+            </div>
+            <div class="time-arrow">→</div>
+            <div class="time-field">
+              <label>HASTA</label>
+              <input type="text" id="intro-to" placeholder="1:30" maxlength="7">
+            </div>
+          </div>
+          <div class="intro-preview" id="intro-preview" style="margin-top:6px">
+            Introduce los tiempos de la intro
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Skip ending -->
+      <div class="slider-row" id="section-skip">
+        <div class="slider-header">
+          <div class="row-info">
+            <label>Saltar créditos / ending</label>
+            <span>Mostrar overlay antes del final</span>
+          </div>
+          <div>
+            <div class="slider-val" id="skip-display">0</div>
+            <div class="slider-unit">segundos</div>
+          </div>
+        </div>
+        <input type="range" id="skip-slider" min="0" max="240" value="0" step="5">
+        <div class="note" id="skip-preview">Desactivado — aparece al terminar el vídeo</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="status" id="status-text">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANTALLA DE AYUDA                          -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="screen-help">
+    <div class="help-content">
+
+      <button class="help-back" id="help-back">← Volver a configuración</button>
+
+      <div class="help-section">
+        <div class="help-title">Sitios compatibles</div>
+        <div class="sites-list">
+          <span class="site-tag">AnimeAV1</span>
+          <span class="site-tag">AnimeFLV</span>
+          <span class="site-tag">SeriesDonghua</span>
+          <span class="site-tag">MundoDonghua</span>
+          <span class="site-tag">DonghuaLife</span>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Reproducción automática</div>
+        <div class="help-text">
+          Al terminar un episodio aparece un <b>contador</b> con cuenta atrás.
+          Pulsa <b>Ver ahora</b> para saltar inmediatamente o <b>Cancelar</b> para quedarte.
+          Si no haces nada, pasa solo al siguiente episodio.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Recordar reproductor</div>
+        <div class="help-text">
+          Guarda qué servidor estás usando (Tamamo, Voe, Daily…).
+          Al pasar al siguiente episodio selecciona ese servidor automáticamente.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Pantalla completa automática</div>
+        <div class="help-text">
+          Si estabas en pantalla completa, al cargar el siguiente episodio aparece un botón para volver a activarla.
+          Se activa solo tras <b>3 segundos</b> si no haces nada.
+        </div>
+        <div class="help-tip">
+          <b>Nota:</b> Los navegadores requieren un gesto del usuario para activar pantalla completa, por eso se muestra el botón en lugar de activarse sola.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Saltar créditos / ending</div>
+        <div class="help-text">
+          El overlay de cuenta atrás aparece <b>N segundos antes</b> del final del vídeo.
+          Útil para saltar el ending y pasar directo al siguiente episodio.
+          Ponlo a <b>0</b> para que aparezca cuando termine el vídeo.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Saltar intro / opening</div>
+        <div class="help-text">
+          Configura los tiempos de inicio y fin de la intro (ej: <b>0:00 → 1:30</b>).
+        </div>
+        <div class="help-text" style="margin-top:4px">
+          • <b>Manual:</b> aparece un botón "⏩ Saltar intro" sobre el vídeo.<br>
+          • <b>Automático:</b> salta solo sin mostrar ningún botón.
+        </div>
+        <div class="help-tip" style="margin-top:6px">
+          <b>Consejo:</b> Los tiempos son globales para todos los episodios. Si la intro cambia de duración entre temporadas, ajústalo aquí.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Cuenta atrás</div>
+        <div class="help-text">
+          Segundos que espera antes de pasar al siguiente episodio. Entre <b>3 y 15 segundos</b>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

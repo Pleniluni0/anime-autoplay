@@ -1,0 +1,11 @@
+# Draft / alternative implementation files
+*Mirar*
+* Mirar*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
