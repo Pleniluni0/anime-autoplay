@@ -468,6 +468,45 @@
     }, 100);
   }
 
+  // Para sitios sin placeholder (animeav1, animeflv, sdonghua, dlife): el iframe del player
+  // ya está cargado al entrar a la página. Polling rápido + fullscreen sobre el iframe
+  // dentro de la ventana de transient activation tras el click del usuario en el prompt.
+  function fullscreenGenericPlayer() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const startTime = Date.now();
+    const wait = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      if (document.fullscreenElement || document.webkitFullscreenElement) { clearInterval(wait); return; }
+
+      const iframe = findPlayerTarget();
+      if (iframe && iframe.tagName === 'IFRAME' && iframe.src) {
+        clearInterval(wait);
+        DBG('fullscreenGenericPlayer: iframe listo tras', elapsed, 'ms, fullscreen iframe', iframe.src.substring(0, 80));
+        (iframe.requestFullscreen || iframe.webkitRequestFullscreen)?.call(iframe)
+          .catch(err => DBG('iframe fs err:', err?.message));
+        try { iframe.contentWindow.postMessage({ _aap: true, type: 'PLAY_VIDEO' }, '*'); } catch (_) {}
+        const sendUnmute = () => {
+          try { iframe.contentWindow.postMessage({ _aap: true, type: 'UNMUTE' }, '*'); } catch (_) {}
+        };
+        sendUnmute();
+        [400, 1000, 2000, 3500].forEach(ms => setTimeout(sendUnmute, ms));
+        return;
+      }
+
+      // Vídeo directo en la página (caso raro fuera de mundo, pero por si acaso)
+      const video = document.querySelector('video');
+      if (video && video.isConnected && video.readyState >= 1) {
+        clearInterval(wait);
+        (video.requestFullscreen || video.webkitRequestFullscreen)?.call(video).catch(() => {});
+        try { video.muted = false; if (video.volume === 0) video.volume = 1; } catch (_) {}
+        if (video.paused) video.play().catch(() => {});
+        return;
+      }
+
+      if (elapsed > 5000) { clearInterval(wait); DBG('fullscreenGenericPlayer: timeout sin iframe'); }
+    }, 100);
+  }
+
   // Dar focus al iframe y simular tecla F para fullscreen
   function activateFullscreenWithF(target) {
     if (!target) return;
@@ -703,7 +742,12 @@
       // Función que ejecuta la restauración cuando el DOM esté listo
       function doRestore() {
         function realIframeReady() {
-          return !!document.querySelector('iframe[src*="mdnemonic"], iframe[src*="dailymotion"], iframe[src*="voe."], iframe[src*="streamtape"], iframe[src*="filemoon"]');
+          return !!document.querySelector(
+            'iframe[src*="mdnemonic"], iframe[src*="dailymotion"], iframe[src*="voe."], ' +
+            'iframe[src*="streamtape"], iframe[src*="filemoon"], iframe[src*="zilla"], ' +
+            'iframe[src*="mega.nz"], iframe[src*="upnshare"], iframe[src*="pdrain"], ' +
+            'iframe[src*="mp4upload"]'
+          );
         }
 
         // En mundodonghua cada player tab tiene su propio Blocker (Tamamo_Blocker, Asura_Blocker, etc.)
@@ -797,38 +841,49 @@
           }
         }
 
-        // 2. Mostrar el placeholder llamando al Blocker, y attachar el interceptor
-        attachPlayClickInterceptor();
-        invokeActiveBlocker(); // intento inmediato
-        setTimeout(() => { invokeActiveBlocker(); }, 300);
-        setTimeout(() => { invokeActiveBlocker(); }, 1000); // por si el tab tarda en cargar su Blocker
+        if (IS_MUNDO) {
+          // ── MundoDonghua: arquitectura de placeholders + Blockers ────────────
+          // 2. Mostrar el placeholder llamando al Blocker, y attachar el interceptor
+          attachPlayClickInterceptor();
+          invokeActiveBlocker(); // intento inmediato
+          setTimeout(() => { invokeActiveBlocker(); }, 300);
+          setTimeout(() => { invokeActiveBlocker(); }, 1000); // por si el tab tarda en cargar su Blocker
 
-        // 2.5. Click programático sobre el placeholder (best-effort, sin gesture).
-        // Si el handler de mundo no chequea isTrusted, el iframe/JWPlayer carga solo y el
-        // video arranca con el mute trick. Si lo chequea, no pasa nada y el prompt de
-        // fullscreen (paso 2.6) captura el click manual del usuario.
-        [200, 800, 1800, 3000].forEach(ms => setTimeout(() => {
-          if (realIframeReady()) return;
-          if (document.querySelector('div[id$="_player"] video, div[id$="_player"] iframe[src]')) return;
-          clickPlaceholder();
-        }, ms));
+          // 2.5. Click programático sobre el placeholder (best-effort, sin gesture).
+          // Si el handler de mundo no chequea isTrusted, el iframe/JWPlayer carga solo y el
+          // video arranca con el mute trick. Si lo chequea, no pasa nada y el prompt de
+          // fullscreen (paso 2.6) captura el click manual del usuario.
+          [200, 800, 1800, 3000].forEach(ms => setTimeout(() => {
+            if (realIframeReady()) return;
+            if (document.querySelector('div[id$="_player"] video, div[id$="_player"] iframe[src]')) return;
+            clickPlaceholder();
+          }, ms));
 
-        // 2.6. Si autoFullscreen está activo, mostrar prompt grande sobre la pantalla CUANTO ANTES.
-        // beforeFullscreen llama a invokeActiveBlocker para asegurar que el placeholder exista
-        // si el usuario hace click muy rápido (antes de que el blocker se haya ejecutado).
-        if (doFullscreen) {
-          const showPrompt = () => {
-            if (document.fullscreenElement) return;
+          // 2.6. Si autoFullscreen está activo, mostrar prompt grande sobre la pantalla CUANTO ANTES.
+          // beforeFullscreen llama a invokeActiveBlocker para asegurar que el placeholder exista
+          // si el usuario hace click muy rápido (antes de que el blocker se haya ejecutado).
+          if (doFullscreen) {
+            if (!document.fullscreenElement) {
+              showFullscreenPrompt(null, {
+                beforeFullscreen: () => {
+                  if (realIframeReady()) return;
+                  invokeActiveBlocker(); // asegurar que el placeholder esté en el DOM
+                  clickPlaceholder();
+                },
+                customFullscreen: () => fullscreenMundoPlayer(),
+              });
+            }
+          }
+        } else {
+          // ── AnimeAV1, AnimeFLV, SeriesDonghua, DonghuaLife ───────────────────
+          // El iframe del player ya está cargado al entrar a la página (sin placeholder).
+          // Mostramos el prompt grande de fullscreen — el click del usuario entra fullscreen
+          // sobre el iframe del player y envía PLAY_VIDEO + UNMUTE para arrancar el video.
+          if (doFullscreen && !document.fullscreenElement) {
             showFullscreenPrompt(null, {
-              beforeFullscreen: () => {
-                if (realIframeReady()) return;
-                invokeActiveBlocker(); // asegurar que el placeholder esté en el DOM
-                clickPlaceholder();
-              },
-              customFullscreen: () => fullscreenMundoPlayer(),
+              customFullscreen: () => fullscreenGenericPlayer(),
             });
-          };
-          showPrompt(); // mostrar inmediatamente
+          }
         }
 
         // 3. Polling: detectar cuando el player real está listo para lanzar autoPlay.
