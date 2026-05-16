@@ -34,6 +34,30 @@
       DBG('PLAY_VIDEO recibido, llamando playPersistent');
       playPersistent();
     }
+    // Desmutear directamente — para casos donde el video arrancó muted por autoplay policy
+    // y mutePlay no puede desmutearlo porque cacheó wasMuted=true del estado autoplay.
+    // video.muted = false vía JS no está bloqueado por la policy cuando el video ya está playing.
+    if (e.data.type === 'UNMUTE') {
+      document.querySelectorAll('video').forEach(v => {
+        try {
+          delete v._aapOrigMuted; // resetear cache de mutePlay para no volver a mutear
+          v.muted = false;
+          if (v.volume === 0) v.volume = 1;
+        } catch (_) {}
+      });
+      // API oficial de Dailymotion y Vimeo
+      document.querySelectorAll('iframe').forEach(f => {
+        if (!f.src) return;
+        if (f.src.includes('dailymotion.com')) {
+          try { f.contentWindow.postMessage({ command: 'setMuted', parameters: [false] }, '*'); } catch (_) {}
+          try { f.contentWindow.postMessage({ command: 'setVolume', parameters: [1] }, '*'); } catch (_) {}
+        }
+        if (f.src.includes('vimeo.com')) {
+          try { f.contentWindow.postMessage({ method: 'setMuted', value: false }, '*'); } catch (_) {}
+          try { f.contentWindow.postMessage({ method: 'setVolume', value: 1 }, '*'); } catch (_) {}
+        }
+      });
+    }
     if (e.data.type === 'SETTINGS') {
       DBG('SETTINGS recibido, autoFullscreen=', e.data.payload?.autoFullscreen, 'nextUrl=', e.data.payload?.nextUrl);
     }

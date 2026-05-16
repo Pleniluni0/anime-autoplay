@@ -11,9 +11,21 @@
     if (!e.data || e.data._aap !== true) return;
 
     // Mensajes que vienen de la página principal → reenviar a iframes hijos
-    if (e.data.type === 'SETTINGS' || e.data.type === 'PLAY_VIDEO') {
+    if (e.data.type === 'SETTINGS' || e.data.type === 'PLAY_VIDEO' || e.data.type === 'UNMUTE') {
       document.querySelectorAll('iframe').forEach(f => {
         try { f.contentWindow.postMessage(e.data, '*'); } catch (_) {}
+        // En caso de UNMUTE también enviamos comandos API a iframes Dailymotion/Vimeo,
+        // por si player.js no llega a tiempo o el iframe no tiene player.js inyectado.
+        if (e.data.type === 'UNMUTE' && f.src) {
+          if (f.src.includes('dailymotion.com')) {
+            try { f.contentWindow.postMessage({ command: 'setMuted', parameters: [false] }, '*'); } catch (_) {}
+            try { f.contentWindow.postMessage({ command: 'setVolume', parameters: [1] }, '*'); } catch (_) {}
+          }
+          if (f.src.includes('vimeo.com')) {
+            try { f.contentWindow.postMessage({ method: 'setMuted', value: false }, '*'); } catch (_) {}
+            try { f.contentWindow.postMessage({ method: 'setVolume', value: 1 }, '*'); } catch (_) {}
+          }
+        }
       });
     }
 

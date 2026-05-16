@@ -391,6 +391,83 @@
     return iframe || video;
   }
 
+  // ── Helpers para mundodonghua: placeholder click + fullscreen del contenedor ──
+  function findActivePlaceholder() {
+    const panes = document.querySelectorAll('.tab-pane.active, .tab-pane.in.active, .tab-pane.show.active');
+    for (const pane of panes) {
+      if (pane.offsetParent === null) continue; // tab oculto
+      const ph = pane.querySelector('img[id$="play"], div[id$="_play"]');
+      if (ph) return ph;
+    }
+    // Fallback: cualquier placeholder visible
+    for (const ph of document.querySelectorAll('img[id$="play"], div[id$="_play"]')) {
+      if (ph.offsetParent !== null) return ph;
+    }
+    return null;
+  }
+
+  function clickPlaceholder() {
+    const ph = findActivePlaceholder();
+    if (!ph) { DBG('clickPlaceholder: no hay placeholder visible'); return false; }
+    DBG('clickPlaceholder: click sintético sobre', ph.id);
+    try { ph.click(); } catch (_) {}
+    try { ph.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); } catch (_) {}
+    return true;
+  }
+
+  // Polling tras click del prompt: espera al iframe/video del player y le pide fullscreen
+  // al contenedor adecuado para que nuestro countdown overlay (Asura) sea visible.
+  // Trusted activation de Chrome dura ~5s, así que tenemos margen.
+  function fullscreenMundoPlayer() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const startTime = Date.now();
+    const wait = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        clearInterval(wait); return;
+      }
+
+      // Caso A: iframe (Tamamo, Voe, etc.) — fullscreen sobre el iframe
+      const iframe = document.querySelector(
+        'iframe[src*="mdnemonic"], iframe[src*="dailymotion"], iframe[src*="voe."], iframe[src*="streamtape"], iframe[src*="filemoon"]'
+      );
+      if (iframe) {
+        clearInterval(wait);
+        DBG('fullscreenMundoPlayer: iframe listo tras', elapsed, 'ms, fullscreen iframe');
+        (iframe.requestFullscreen || iframe.webkitRequestFullscreen)?.call(iframe)
+          .catch(err => DBG('iframe fs err:', err?.message));
+        try { iframe.contentWindow.postMessage({ _aap: true, type: 'PLAY_VIDEO' }, '*'); } catch (_) {}
+        // UNMUTE explícito + retries — el video pudo haber arrancado muted por la autoplay
+        // policy (sin gesture), y mutePlay cachea ese estado. UNMUTE fuerza muted=false.
+        const sendUnmute = () => {
+          try { iframe.contentWindow.postMessage({ _aap: true, type: 'UNMUTE' }, '*'); } catch (_) {}
+        };
+        sendUnmute();
+        [400, 1000, 2000, 3500].forEach(ms => setTimeout(sendUnmute, ms));
+        return;
+      }
+
+      // Caso B: <video> directo (Asura/JWPlayer) — fullscreen sobre el contenedor
+      const playerDiv = document.querySelector('div[id$="_player"]');
+      const video = (playerDiv && playerDiv.querySelector('video')) || document.querySelector('video');
+      if (video && video.isConnected && video.readyState >= 1) {
+        clearInterval(wait);
+        const target = playerDiv || video;
+        DBG('fullscreenMundoPlayer: video listo tras', elapsed, 'ms, fullscreen sobre', target.id || 'video');
+        (target.requestFullscreen || target.webkitRequestFullscreen)?.call(target)
+          .catch(err => {
+            DBG('container fs err:', err?.message, '— fallback video');
+            (video.requestFullscreen || video.webkitRequestFullscreen)?.call(video).catch(() => {});
+          });
+        try { video.muted = false; if (video.volume === 0) video.volume = 1; } catch (_) {}
+        if (video.paused) video.play().catch(() => {});
+        return;
+      }
+
+      if (elapsed > 5000) { clearInterval(wait); DBG('fullscreenMundoPlayer: timeout sin player'); }
+    }, 100);
+  }
+
   // Dar focus al iframe y simular tecla F para fullscreen
   function activateFullscreenWithF(target) {
     if (!target) return;
@@ -453,7 +530,7 @@
     document.head.appendChild(style);
   }
 
-  function showFullscreenPrompt(target) {
+  function showFullscreenPrompt(target, opts = {}) {
     DBG('showFullscreenPrompt llamado, fullscreenElement=', document.fullscreenElement, 'existing prompt=', document.getElementById('_aap_fs_prompt'));
     if (document.fullscreenElement || document.getElementById('_aap_fs_prompt')) return;
     DBG('showFullscreenPrompt creando overlay');
@@ -519,6 +596,15 @@
 
     const enterFs = () => {
       cleanup();
+      // beforeFullscreen corre PRIMERO dentro del trusted click (ej: click sintético al placeholder de mundo)
+      if (opts.beforeFullscreen) {
+        try { opts.beforeFullscreen(); } catch (e) { DBG('beforeFullscreen err:', e?.message); }
+      }
+      // customFullscreen reemplaza la lógica por defecto (ej: esperar al player de mundo y FS al contenedor)
+      if (opts.customFullscreen) {
+        try { opts.customFullscreen(); } catch (e) { DBG('customFullscreen err:', e?.message); }
+        return;
+      }
       // Re-evaluar target en el momento del click — puede que ahora exista aunque al crear el prompt no
       const liveTarget = target || findPlayerTarget();
       document.querySelectorAll('iframe').forEach(f => {
@@ -676,10 +762,15 @@
               const video = pane.querySelector('video') || playerDiv.querySelector('video');
               if (video && video.isConnected && video.readyState >= 1) {
                 clearInterval(waitVideo);
-                DBG('video listo tras', elapsed, 'ms, requestFullscreen sobre <video>');
-                (video.requestFullscreen || video.webkitRequestFullscreen)?.call(video)
-                  .then(() => DBG('video fullscreen OK'))
-                  .catch(err => DBG('video fs err:', err?.message));
+                // Fullscreen sobre el contenedor (no sobre <video>) para que overlays
+                // hijos del root (countdown, etc.) sigan siendo visibles en fullscreen.
+                DBG('video listo tras', elapsed, 'ms, requestFullscreen sobre contenedor', playerDiv.id);
+                (playerDiv.requestFullscreen || playerDiv.webkitRequestFullscreen)?.call(playerDiv)
+                  .then(() => DBG('container fullscreen OK'))
+                  .catch(err => {
+                    DBG('container fs err:', err?.message, '— fallback a <video>');
+                    (video.requestFullscreen || video.webkitRequestFullscreen)?.call(video).catch(() => {});
+                  });
                 if (video.paused) { video.play().catch(() => {}); }
                 return;
               }
@@ -708,21 +799,52 @@
 
         // 2. Mostrar el placeholder llamando al Blocker, y attachar el interceptor
         attachPlayClickInterceptor();
-        setTimeout(() => { invokeActiveBlocker(); }, 500);
-        setTimeout(() => { invokeActiveBlocker(); }, 1500); // por si el tab tarda en cargar su Blocker
+        invokeActiveBlocker(); // intento inmediato
+        setTimeout(() => { invokeActiveBlocker(); }, 300);
+        setTimeout(() => { invokeActiveBlocker(); }, 1000); // por si el tab tarda en cargar su Blocker
 
-        // 3. Polling: si en algún momento el iframe real carga (por click del usuario u otro), lanzar autoPlay
+        // 2.5. Click programático sobre el placeholder (best-effort, sin gesture).
+        // Si el handler de mundo no chequea isTrusted, el iframe/JWPlayer carga solo y el
+        // video arranca con el mute trick. Si lo chequea, no pasa nada y el prompt de
+        // fullscreen (paso 2.6) captura el click manual del usuario.
+        [200, 800, 1800, 3000].forEach(ms => setTimeout(() => {
+          if (realIframeReady()) return;
+          if (document.querySelector('div[id$="_player"] video, div[id$="_player"] iframe[src]')) return;
+          clickPlaceholder();
+        }, ms));
+
+        // 2.6. Si autoFullscreen está activo, mostrar prompt grande sobre la pantalla CUANTO ANTES.
+        // beforeFullscreen llama a invokeActiveBlocker para asegurar que el placeholder exista
+        // si el usuario hace click muy rápido (antes de que el blocker se haya ejecutado).
+        if (doFullscreen) {
+          const showPrompt = () => {
+            if (document.fullscreenElement) return;
+            showFullscreenPrompt(null, {
+              beforeFullscreen: () => {
+                if (realIframeReady()) return;
+                invokeActiveBlocker(); // asegurar que el placeholder esté en el DOM
+                clickPlaceholder();
+              },
+              customFullscreen: () => fullscreenMundoPlayer(),
+            });
+          };
+          showPrompt(); // mostrar inmediatamente
+        }
+
+        // 3. Polling: detectar cuando el player real está listo para lanzar autoPlay.
+        // En Asura no hay iframe — chequear también <video> directo dentro de panes activos.
         let attempts = 0;
         const poll = setInterval(() => {
           attempts++;
-          if (realIframeReady()) {
-            DBG('iframe real detectado tras', attempts, 'intentos, lanzando autoPlay');
+          const videoReady = !!document.querySelector('div[id$="_player"] video, video');
+          if (realIframeReady() || (IS_MUNDO && videoReady)) {
+            DBG('player real detectado tras', attempts, 'intentos, lanzando autoPlay');
             clearInterval(poll);
             setTimeout(() => autoPlayWhenReady(fromPrevEpisode), 1500);
             return;
           }
           if (attempts >= 60) { // 30s
-            DBG('doRestore: timeout esperando iframe (usuario debe hacer click en play)');
+            DBG('doRestore: timeout esperando player (usuario debe hacer click en play)');
             clearInterval(poll);
           }
         }, 500);
@@ -730,15 +852,19 @@
 
       // Esperar a que los tabs del player estén en el DOM
       // (en MundoDonghua pueden tardar más porque son jQuery)
-      let waitAttempts = 0;
-      const waitForTabs = setInterval(() => {
-        waitAttempts++;
-        const tabs = document.querySelectorAll('ul.nav-tabs a, .toggle-enlace, .border-line button, #iframe-episode, iframe[src*="player"]');
-        if (tabs.length > 0 || waitAttempts > 10) {
-          clearInterval(waitForTabs);
-          doRestore();
-        }
-      }, 300);
+      const tabsSel = 'ul.nav-tabs a, .toggle-enlace, .border-line button, #iframe-episode, iframe[src*="player"]';
+      if (document.querySelectorAll(tabsSel).length > 0) {
+        doRestore(); // tabs ya en el DOM, no esperar
+      } else {
+        let waitAttempts = 0;
+        const waitForTabs = setInterval(() => {
+          waitAttempts++;
+          if (document.querySelectorAll(tabsSel).length > 0 || waitAttempts > 15) {
+            clearInterval(waitForTabs);
+            doRestore();
+          }
+        }, 150);
+      }
     });
   }
 
@@ -758,8 +884,8 @@
     pushSettings();
     scanAllVideos();
     [500, 1000, 2000, 4000].forEach(ms => setTimeout(() => { pushSettings(); scanAllVideos(); }, ms));
-    // Restaurar al cargar la página (con delay para que el DOM esté listo)
-    setTimeout(restoreOnLoad, 1500);
+    // Restaurar lo antes posible — waitForTabs en doRestore gestiona su propio polling
+    restoreOnLoad();
     setTimeout(detectAndSaveActivePlayer, 3000);
     setTimeout(() => preloadNextEpisode(getNextUrl()), 4000);
   });
