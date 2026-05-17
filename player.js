@@ -285,7 +285,7 @@
         * { box-sizing:border-box; margin:0; padding:0; }
         #card {
           background:rgba(8,10,18,0.97);
-          border:1px solid rgba(0,188,164,0.35);
+          border:1px solid rgba(79,142,247,0.35);
           border-radius:14px;
           padding:18px 22px 16px;
           display:flex; flex-direction:column; align-items:center; gap:10px;
@@ -297,14 +297,14 @@
         #wrap { position:relative; width:60px; height:60px; display:flex; align-items:center; justify-content:center; }
         svg { position:absolute; top:0; left:0; width:60px; height:60px; transform:rotate(-90deg); }
         .rb { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:3; }
-        .rf { fill:none; stroke:#00BCA4; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 0.9s linear; }
+        .rf { fill:none; stroke:#4F8EF7; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 0.9s linear; }
         #num { font-size:22px; font-weight:800; color:#fff; position:relative; z-index:1; line-height:1; }
         #ttl { font-size:12px; font-weight:600; color:rgba(255,255,255,0.78); text-align:center; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         #btns { display:flex; gap:8px; margin-top:3px; }
         button { border:none; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; padding:7px 14px; transition:all 0.15s; font-family:inherit; letter-spacing:0.02em; pointer-events:all; }
         #no  { background:rgba(255,255,255,0.09); color:rgba(255,255,255,0.55); }
         #no:hover  { background:rgba(255,255,255,0.16); color:#fff; }
-        #yes { background:#00BCA4; color:#061212; }
+        #yes { background:#4F8EF7; color:#060d1f; }
         #yes:hover { background:#00d4b8; }
       </style>
       <div id="card">
@@ -419,9 +419,9 @@
       <style>
         button {
           background: rgba(8,10,18,0.92);
-          border: 2px solid rgba(0,188,164,0.6);
+          border: 2px solid rgba(79,142,247,0.6);
           border-radius: 10px;
-          color: #00BCA4;
+          color: #4F8EF7;
           font-size: 15px;
           font-weight: 800;
           padding: 11px 22px;
@@ -430,13 +430,13 @@
           letter-spacing: 0.04em;
           transition: all 0.15s;
           white-space: nowrap;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(0,188,164,0.2);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(79,142,247,0.2);
           pointer-events: all;
         }
         button:hover {
-          background: #00BCA4;
-          color: #061212;
-          box-shadow: 0 4px 24px rgba(0,188,164,0.4);
+          background: #4F8EF7;
+          color: #060d1f;
+          box-shadow: 0 4px 24px rgba(79,142,247,0.4);
           transform: scale(1.04);
         }
       </style>

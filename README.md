@@ -4,13 +4,15 @@ Extensión de Chrome que convierte sitios de anime/donghua en una experiencia ti
 
 Funciona en **dos modos**: con host nativo instalado (totalmente automático) o sin él (igual que una extensión normal, con un click manual para activar fullscreen).
 
-## Sitios compatibles
+## Sitios probados
 
 - AnimeAV1
 - AnimeFLV
 - SeriesDonghua
 - MundoDonghua
 - DonghuaLife
+
+Funciona en la mayoría de los reproductores embebidos (Dailymotion, Voe, JWPlayer, Streamtape, Filemoon, HLS/zilla-networks, Mega…).
 
 ## Modos de funcionamiento
 

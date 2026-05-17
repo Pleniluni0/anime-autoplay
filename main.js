@@ -190,7 +190,7 @@
     Object.assign(mainCdEl.style, { position:'fixed', bottom:'80px', right:'20px', zIndex:'2147483647', opacity:'0', transform:'translateY(14px) scale(0.96)', transition:'opacity 0.3s ease, transform 0.3s ease', pointerEvents:'none' });
     getRoot().appendChild(mainCdEl);
     const sh = mainCdEl.attachShadow({ mode:'open' });
-    sh.innerHTML = `<style>*{box-sizing:border-box;margin:0;padding:0}#card{background:rgba(8,10,18,.97);border:1px solid rgba(0,188,164,.35);border-radius:14px;padding:18px 22px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:210px;box-shadow:0 8px 40px rgba(0,0,0,.7);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}#lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700}#wrap{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}svg{position:absolute;top:0;left:0;width:60px;height:60px;transform:rotate(-90deg)}.rb{fill:none;stroke:rgba(255,255,255,.08);stroke-width:3}.rf{fill:none;stroke:#00BCA4;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .9s linear}#num{font-size:22px;font-weight:800;color:#fff;position:relative;z-index:1;line-height:1}#ttl{font-size:12px;font-weight:600;color:rgba(255,255,255,.78);text-align:center;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#btns{display:flex;gap:8px;margin-top:3px}button{border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;padding:7px 14px;transition:all .15s;font-family:inherit;pointer-events:all}#no{background:rgba(255,255,255,.09);color:rgba(255,255,255,.55)}#no:hover{background:rgba(255,255,255,.16);color:#fff}#yes{background:#00BCA4;color:#061212}#yes:hover{background:#00d4b8}</style><div id="card"><div id="lbl">Siguiente episodio en</div><div id="wrap"><svg viewBox="0 0 60 60"><circle class="rb" cx="30" cy="30" r="25"/><circle class="rf" cx="30" cy="30" r="25" id="ring" style="stroke-dasharray:${circ};stroke-dashoffset:0"/></svg><span id="num">5</span></div><div id="ttl">Episodio siguiente</div><div id="btns"><button id="no">Cancelar</button><button id="yes">&#9654; Ver ahora</button></div></div>`;
+    sh.innerHTML = `<style>*{box-sizing:border-box;margin:0;padding:0}#card{background:rgba(8,10,18,.97);border:1px solid rgba(79,142,247,.35);border-radius:14px;padding:18px 22px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:210px;box-shadow:0 8px 40px rgba(0,0,0,.7);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}#lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700}#wrap{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center}svg{position:absolute;top:0;left:0;width:60px;height:60px;transform:rotate(-90deg)}.rb{fill:none;stroke:rgba(255,255,255,.08);stroke-width:3}.rf{fill:none;stroke:#4F8EF7;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .9s linear}#num{font-size:22px;font-weight:800;color:#fff;position:relative;z-index:1;line-height:1}#ttl{font-size:12px;font-weight:600;color:rgba(255,255,255,.78);text-align:center;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#btns{display:flex;gap:8px;margin-top:3px}button{border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;padding:7px 14px;transition:all .15s;font-family:inherit;pointer-events:all}#no{background:rgba(255,255,255,.09);color:rgba(255,255,255,.55)}#no:hover{background:rgba(255,255,255,.16);color:#fff}#yes{background:#4F8EF7;color:#060d1f}#yes:hover{background:#00d4b8}</style><div id="card"><div id="lbl">Siguiente episodio en</div><div id="wrap"><svg viewBox="0 0 60 60"><circle class="rb" cx="30" cy="30" r="25"/><circle class="rf" cx="30" cy="30" r="25" id="ring" style="stroke-dasharray:${circ};stroke-dashoffset:0"/></svg><span id="num">5</span></div><div id="ttl">Episodio siguiente</div><div id="btns"><button id="no">Cancelar</button><button id="yes">&#9654; Ver ahora</button></div></div>`;
     sh.getElementById('no').onclick  = stopMainCountdown;
     sh.getElementById('yes').onclick = () => {
       stopMainCountdown();
@@ -255,7 +255,7 @@
     Object.assign(mainSkipBtnEl.style, { position:'fixed', bottom:'80px', right:'20px', zIndex:'2147483646', pointerEvents:'all' });
     getRoot().appendChild(mainSkipBtnEl);
     const sh = mainSkipBtnEl.attachShadow({ mode:'open' });
-    sh.innerHTML = `<style>button{background:rgba(8,10,18,.92);border:2px solid rgba(0,188,164,.6);border-radius:10px;color:#00BCA4;font-size:15px;font-weight:800;padding:11px 22px;cursor:pointer;font-family:-apple-system,'Segoe UI',sans-serif;letter-spacing:.04em;transition:all .15s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:all}button:hover{background:#00BCA4;color:#061212}</style><button id="btn">&#9193; Saltar intro</button>`;
+    sh.innerHTML = `<style>button{background:rgba(8,10,18,.92);border:2px solid rgba(79,142,247,.6);border-radius:10px;color:#4F8EF7;font-size:15px;font-weight:800;padding:11px 22px;cursor:pointer;font-family:-apple-system,'Segoe UI',sans-serif;letter-spacing:.04em;transition:all .15s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:all}button:hover{background:#4F8EF7;color:#060d1f}</style><button id="btn">&#9193; Saltar intro</button>`;
     sh.getElementById('btn').onclick = () => doMainIntroSkip(video);
     mainSkipBtnEl._sh = sh;
     const hideAt = settings.introTo + 2;
@@ -558,8 +558,8 @@
         to   { opacity: 1; transform: scale(1)    translateY(0);   }
       }
       @keyframes _aap_pulse {
-        0%, 100% { box-shadow: 0 8px 48px rgba(0,0,0,.85), 0 0 0 0   rgba(0,188,164,.4); }
-        50%       { box-shadow: 0 8px 48px rgba(0,0,0,.85), 0 0 0 10px rgba(0,188,164,.0); }
+        0%, 100% { box-shadow: 0 8px 48px rgba(0,0,0,.85), 0 0 0 0   rgba(79,142,247,.4); }
+        50%       { box-shadow: 0 8px 48px rgba(0,0,0,.85), 0 0 0 10px rgba(79,142,247,.0); }
       }
       @keyframes _aap_ring {
         from { stroke-dashoffset: 157; }
@@ -591,7 +591,7 @@
     const card = document.createElement('div');
     Object.assign(card.style, {
       background: 'rgba(8,10,18,0.96)',
-      border: '1.5px solid rgba(0,188,164,0.45)',
+      border: '1.5px solid rgba(79,142,247,0.45)',
       borderRadius: '16px',
       padding: '24px 34px',
       textAlign: 'center',
@@ -607,8 +607,8 @@
     card.innerHTML = `
       <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase">Pantalla completa</div>
 
-      <div style="position:relative;width:48px;height:48px;margin:4px 0;display:flex;align-items:center;justify-content:center;background:rgba(0,188,164,0.1);border-radius:50%">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#00BCA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <div style="position:relative;width:48px;height:48px;margin:4px 0;display:flex;align-items:center;justify-content:center;background:rgba(79,142,247,0.1);border-radius:50%">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#4F8EF7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 3 21 3 21 9"></polyline>
           <polyline points="9 21 3 21 3 15"></polyline>
           <line x1="21" y1="3" x2="14" y2="10"></line>
@@ -616,7 +616,7 @@
         </svg>
       </div>
 
-      <div style="color:#00BCA4;font-size:14px;font-weight:800;letter-spacing:.02em">Pulsa en cualquier parte</div>
+      <div style="color:#4F8EF7;font-size:14px;font-weight:800;letter-spacing:.02em">Pulsa en cualquier parte</div>
       <div style="color:rgba(255,255,255,.4);font-size:11px">para activar</div>
       <span id="_aap_skip" style="color:rgba(255,255,255,.2);font-size:10px;cursor:pointer;pointer-events:all;text-decoration:underline;margin-top:2px">Saltar</span>
     `;
