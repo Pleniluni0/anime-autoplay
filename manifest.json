@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Anime AutoPlay",
-  "version": "6.1.0",
-  "description": "Autoplay para AnimeAV1, AnimeFLV, SeriesDonghua, MundoDonghua y DonghuaLife.",
-  "permissions": ["storage"],
+  "name": "Host Anime Autoplay",
+  "version": "6.2.0",
+  "description": "Autoplay con click automático vía native host.",
+  "permissions": ["storage", "nativeMessaging"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "host_permissions": ["*://*/*"],
   "content_scripts": [
     {

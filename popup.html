@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anime AutoPlay</title>
+  <title>Host Anime Autoplay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -19,13 +19,13 @@
 
     /* ── Header ── */
     .header {
-      background:linear-gradient(135deg,rgba(0,188,164,0.15),rgba(0,188,164,0.04));
-      border-bottom:1px solid rgba(0,188,164,0.18);
+      background:linear-gradient(135deg,rgba(79,142,247,0.15),rgba(79,142,247,0.04));
+      border-bottom:1px solid rgba(79,142,247,0.18);
       padding:14px 18px 12px;
       display:flex; align-items:center; gap:10px;
     }
     .logo {
-      width:32px; height:32px; background:#00BCA4;
+      width:32px; height:32px; background:#4F8EF7;
       border-radius:8px; display:flex; align-items:center;
       justify-content:center; font-size:16px; flex-shrink:0;
     }
@@ -39,7 +39,7 @@
       cursor:pointer; flex-shrink:0; transition:all 0.2s;
       font-family:'Sora',sans-serif;
     }
-    .help-btn:hover { background:rgba(0,188,164,0.2); color:#00BCA4; }
+    .help-btn:hover { background:rgba(79,142,247,0.2); color:#4F8EF7; }
 
     /* ── Screens ── */
     #screen-main, #screen-help { display:flex; flex-direction:column; }
@@ -69,13 +69,13 @@
       width:18px; height:18px; left:3px; top:3px;
       background:rgba(255,255,255,0.5); border-radius:50%; transition:0.25s;
     }
-    input:checked + .slider { background:#00BCA4; }
+    input:checked + .slider { background:#4F8EF7; }
     input:checked + .slider::before { transform:translateX(20px); background:#0f111a; }
 
     /* Range sliders */
     .slider-row { display:flex; flex-direction:column; gap:8px; }
     .slider-header { display:flex; justify-content:space-between; align-items:flex-start; }
-    .slider-val { font-size:20px; font-weight:700; color:#00BCA4; line-height:1; text-align:right; }
+    .slider-val { font-size:20px; font-weight:700; color:#4F8EF7; line-height:1; text-align:right; }
     .slider-unit { font-size:9px; color:rgba(255,255,255,0.3); display:block; margin-top:2px; text-align:right; }
     input[type="range"] {
       width:100%; -webkit-appearance:none; height:4px;
@@ -83,11 +83,11 @@
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance:none; width:16px; height:16px;
-      border-radius:50%; background:#00BCA4; cursor:pointer;
-      box-shadow:0 0 8px rgba(0,188,164,0.4);
+      border-radius:50%; background:#4F8EF7; cursor:pointer;
+      box-shadow:0 0 8px rgba(79,142,247,0.4);
     }
     .note { font-size:10px; color:rgba(255,255,255,0.35); text-align:center; margin-top:-4px; min-height:14px; transition:color 0.2s; }
-    .note.active { color:#00BCA4; }
+    .note.active { color:#4F8EF7; }
 
     /* Intro */
     .time-inputs { display:flex; align-items:center; gap:8px; }
@@ -99,8 +99,8 @@
       font-size:15px; font-weight:700; text-align:center;
       padding:7px 4px; width:100%; outline:none; transition:border-color 0.2s;
     }
-    .time-field input[type="text"]:focus { border-color:rgba(0,188,164,0.5); }
-    .time-field input[type="text"].valid { border-color:rgba(0,188,164,0.4); color:#00BCA4; }
+    .time-field input[type="text"]:focus { border-color:rgba(79,142,247,0.5); }
+    .time-field input[type="text"].valid { border-color:rgba(79,142,247,0.4); color:#4F8EF7; }
     .time-field input[type="text"].error { border-color:rgba(255,80,80,0.5); color:rgba(255,130,130,0.9); }
     .time-arrow { font-size:16px; color:rgba(255,255,255,0.2); margin-top:18px; flex-shrink:0; }
     .mode-pills { display:flex; gap:6px; }
@@ -110,14 +110,14 @@
       border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05);
       color:rgba(255,255,255,0.4); transition:all 0.18s; user-select:none;
     }
-    .pill.active { background:#00BCA4; color:#061212; border-color:#00BCA4; }
+    .pill.active { background:#4F8EF7; color:#060d1f; border-color:#4F8EF7; }
     .intro-preview { font-size:10px; color:rgba(255,255,255,0.35); text-align:center; min-height:14px; transition:color 0.2s; }
-    .intro-preview.active { color:#00BCA4; }
+    .intro-preview.active { color:#4F8EF7; }
 
     .divider { height:1px; background:rgba(255,255,255,0.06); }
 
     .status { text-align:center; font-size:11px; color:rgba(255,255,255,0.3); padding-bottom:2px; }
-    .status strong { color:#00BCA4; }
+    .status strong { color:#4F8EF7; }
     .disabled-section { opacity:0.35; pointer-events:none; }
 
     /* ── Help screen ── */
@@ -132,27 +132,27 @@
       font-family:'Sora',sans-serif; font-size:12px; font-weight:600;
       cursor:pointer; padding:0; transition:color 0.2s;
     }
-    .help-back:hover { color:#00BCA4; }
+    .help-back:hover { color:#4F8EF7; }
     .help-section { display:flex; flex-direction:column; gap:6px; }
     .help-title {
-      font-size:11px; font-weight:700; color:#00BCA4;
+      font-size:11px; font-weight:700; color:#4F8EF7;
       letter-spacing:0.08em; text-transform:uppercase;
       display:flex; align-items:center; gap:6px;
     }
     .help-title::before {
       content:''; display:block; width:3px; height:12px;
-      background:#00BCA4; border-radius:2px; flex-shrink:0;
+      background:#4F8EF7; border-radius:2px; flex-shrink:0;
     }
     .help-text {
       font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6;
     }
     .help-text b { color:rgba(255,255,255,0.85); font-weight:600; }
     .help-tip {
-      background:rgba(0,188,164,0.07); border:1px solid rgba(0,188,164,0.15);
+      background:rgba(79,142,247,0.07); border:1px solid rgba(79,142,247,0.15);
       border-radius:8px; padding:10px 12px;
       font-size:10px; color:rgba(255,255,255,0.5); line-height:1.6;
     }
-    .help-tip b { color:#00BCA4; }
+    .help-tip b { color:#4F8EF7; }
     .sites-list {
       display:flex; flex-wrap:wrap; gap:5px; margin-top:2px;
     }
@@ -169,7 +169,7 @@
   <div class="header">
     <div class="logo">▶</div>
     <div class="header-text">
-      <h1>Anime AutoPlay</h1>
+      <h1>Host Anime Autoplay</h1>
       <p>AV1 · FLV · SDonghua · Mundo · DLife</p>
     </div>
     <button class="help-btn" id="help-toggle" title="Ayuda">?</button>
@@ -211,8 +211,8 @@
 
       <div class="row">
         <div class="row-info">
-          <label>Pantalla completa automática</label>
-          <span>Al pasar al episodio siguiente</span>
+          <label>Modo automático</label>
+          <span>Click automático vía host nativo</span>
         </div>
         <label class="toggle">
           <input type="checkbox" id="autofs-toggle">
@@ -335,13 +335,30 @@
       </div>
 
       <div class="help-section">
-        <div class="help-title">Pantalla completa automática</div>
+        <div class="help-title">Modo automático</div>
         <div class="help-text">
-          Si estabas en pantalla completa, al cargar el siguiente episodio aparece un botón para volver a activarla.
-          Se activa solo tras <b>3 segundos</b> si no haces nada.
+          Al pasar de episodio, el host nativo simula un <b>click real</b> en el centro de la pantalla.
+          Esto activa el reproductor y la pantalla completa <b>sin que tengas que tocar nada</b>.
         </div>
         <div class="help-tip">
-          <b>Nota:</b> Los navegadores requieren un gesto del usuario para activar pantalla completa, por eso se muestra el botón en lugar de activarse sola.
+          <b>Requiere activación del host:</b> el script Python debe estar instalado y registrado en Windows.
+          Ejecuta <b>install_host.ps1</b> con el ID de la extensión una sola vez para activarlo.<br><br>
+          Si el host no está disponible, el overlay seguirá apareciendo pero necesitarás pulsar tú manualmente.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title">Activar el host nativo</div>
+        <div class="help-text">
+          <b>1.</b> Instala la dependencia: <b>pip install pyautogui</b><br>
+          <b>2.</b> Copia el <b>ID</b> de la extensión desde <b>chrome://extensions/</b><br>
+          <b>3.</b> Ejecuta en PowerShell desde la carpeta <b>host\</b>:<br>
+        </div>
+        <div class="help-tip" style="margin-top:4px;font-family:monospace">
+          .\install_host.ps1 -ExtensionId "tu_id_aqui"
+        </div>
+        <div class="help-text" style="margin-top:4px">
+          <b>4.</b> Reinicia Chrome. Listo.
         </div>
       </div>
 

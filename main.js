@@ -624,7 +624,17 @@
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 
-    // Removed ring animation
+    // Auto-click vía native host: simula un click real en el centro de la ventana
+    // para evitar que el usuario tenga que pulsar manualmente.
+    (() => {
+      const x = Math.round(window.screenX + window.innerWidth / 2);
+      const y = Math.round(window.screenY + (window.outerHeight - window.innerHeight) + window.innerHeight / 2);
+      chrome.runtime.sendMessage({ type: 'AUTO_CLICK', x, y, delay: 350 }, () => {
+        if (chrome.runtime.lastError) {
+          DBG('[AAP Host] Auto-click no disponible:', chrome.runtime.lastError.message);
+        }
+      });
+    })();
 
     let done = false;
     const cleanup = () => {
