@@ -261,7 +261,6 @@
 
   function buildCountdown() {
     if (cdEl) return;
-    const circ = 2 * Math.PI * 25;
     const host = document.createElement('div');
     host.id = '_aap_cd';
     host.style.cssText = `
@@ -291,11 +290,7 @@
           font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
         }
         #lbl { font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.38); font-weight:700; }
-        #wrap { position:relative; width:60px; height:60px; display:flex; align-items:center; justify-content:center; }
-        svg { position:absolute; top:0; left:0; width:60px; height:60px; transform:rotate(-90deg); }
-        .rb { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:3; }
-        .rf { fill:none; stroke:#4F8EF7; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 0.9s linear; }
-        #num { font-size:22px; font-weight:800; color:#fff; position:relative; z-index:1; line-height:1; }
+        #num { font-size:32px; font-weight:800; color:#4F8EF7; line-height:1; }
         #ttl { font-size:12px; font-weight:600; color:rgba(255,255,255,0.78); text-align:center; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         #btns { display:flex; gap:8px; margin-top:3px; }
         button { border:none; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; padding:7px 14px; transition:all 0.15s; font-family:inherit; letter-spacing:0.02em; pointer-events:all; }
@@ -306,14 +301,7 @@
       </style>
       <div id="card">
         <div id="lbl">Siguiente episodio en</div>
-        <div id="wrap">
-          <svg viewBox="0 0 60 60">
-            <circle class="rb" cx="30" cy="30" r="25"/>
-            <circle class="rf" cx="30" cy="30" r="25" id="ring"
-              style="stroke-dasharray:${circ};stroke-dashoffset:0"/>
-          </svg>
-          <span id="num">5</span>
-        </div>
+        <span id="num">5</span>
         <div id="ttl">Episodio siguiente</div>
         <div id="btns">
           <button id="no" style="pointer-events:all">Cancelar</button>
@@ -355,13 +343,7 @@
 
   function tickCountdown(secs) {
     if (!cdEl?._sh) return;
-    const sh = cdEl._sh;
-    sh.getElementById('num').textContent = secs;
-    const ring = sh.getElementById('ring');
-    if (ring) {
-      const circ = 2 * Math.PI * 25;
-      ring.style.strokeDashoffset = `${circ - (secs / Math.max(S.countdownSeconds, 1)) * circ}`;
-    }
+    cdEl._sh.getElementById('num').textContent = secs;
   }
 
   function countdownTick() {
