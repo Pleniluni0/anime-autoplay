@@ -189,7 +189,7 @@
     Object.assign(mainCdEl.style, { position:'fixed', bottom:'80px', right:'20px', zIndex:'2147483647', opacity:'0', transform:'translateY(14px) scale(0.96)', transition:'opacity 0.3s ease, transform 0.3s ease', pointerEvents:'none' });
     getRoot().appendChild(mainCdEl);
     const sh = mainCdEl.attachShadow({ mode:'open' });
-    sh.innerHTML = `<style>*{box-sizing:border-box;margin:0;padding:0}#card{background:rgba(8,10,18,.97);border:1px solid rgba(79,142,247,.35);border-radius:14px;padding:18px 22px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:210px;box-shadow:0 8px 40px rgba(0,0,0,.7);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}#lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700}#num{font-size:32px;font-weight:800;color:#4F8EF7;line-height:1}#ttl{font-size:12px;font-weight:600;color:rgba(255,255,255,.78);text-align:center;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#btns{display:flex;gap:8px;margin-top:3px}button{border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;padding:7px 14px;transition:all .15s;font-family:inherit;pointer-events:all}#no{background:rgba(255,255,255,.09);color:rgba(255,255,255,.55)}#no:hover{background:rgba(255,255,255,.16);color:#fff}#yes{background:#4F8EF7;color:#060d1f}#yes:hover{background:#00d4b8}</style><div id="card"><div id="lbl">Siguiente episodio en</div><span id="num">5</span><div id="ttl">Episodio siguiente</div><div id="btns"><button id="no">Cancelar</button><button id="yes">&#9654; Ver ahora</button></div></div>`;
+    sh.innerHTML = `<style>*{box-sizing:border-box;margin:0;padding:0}#card{background:rgba(8,10,18,.97);border:1px solid rgba(79,142,247,.35);border-radius:14px;padding:18px 22px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:210px;box-shadow:0 8px 40px rgba(0,0,0,.7);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}#lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700}#num{font-size:32px;font-weight:800;color:#4F8EF7;line-height:1}#ttl{font-size:12px;font-weight:600;color:rgba(255,255,255,.78);text-align:center;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#btns{display:flex;gap:8px;margin-top:3px}button{border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;padding:7px 14px;transition:all .15s;font-family:inherit;pointer-events:all}#no{background:rgba(255,255,255,.09);color:rgba(255,255,255,.55)}#no:hover{background:rgba(255,255,255,.16);color:#fff}#yes{background:#4F8EF7;color:#060d1f}#yes:hover{background:#7ab3fb}</style><div id="card"><div id="lbl">Siguiente episodio en</div><span id="num">5</span><div id="ttl">Episodio siguiente</div><div id="btns"><button id="no">Cancelar</button><button id="yes">&#9654; Ver ahora</button></div></div>`;
     sh.getElementById('no').onclick  = stopMainCountdown;
     sh.getElementById('yes').onclick = () => {
       stopMainCountdown();
@@ -203,6 +203,23 @@
   }
   function showMainCountdown() {
     buildMainCountdown();
+    // Sin fullscreen: posicionar relativo al div del player para que no quede fuera
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      const player = document.querySelector('div[id$="_player"], iframe[src]:not([src=""]), video');
+      if (player) {
+        const r = player.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          mainCdEl.style.bottom = Math.max(10, window.innerHeight - r.bottom + 20) + 'px';
+          mainCdEl.style.right  = Math.max(10, window.innerWidth  - r.right  + 20) + 'px';
+        }
+      } else {
+        mainCdEl.style.bottom = '80px';
+        mainCdEl.style.right  = '20px';
+      }
+    } else {
+      mainCdEl.style.bottom = '80px';
+      mainCdEl.style.right  = '20px';
+    }
     mainCdEl._sh.getElementById('ttl').textContent = getNextLabel();
     mainCdEl.getBoundingClientRect();
     mainCdEl.style.opacity='1'; mainCdEl.style.transform='translateY(0) scale(1)'; mainCdEl.style.pointerEvents='all';
@@ -368,8 +385,15 @@
   }
 
   document.addEventListener('click', (e) => {
-    if (e.target.closest('ul.nav-tabs a, .toggle-enlace, .border-line button') && settings.rememberPlayer)
-      setTimeout(detectAndSaveActivePlayer, 300);
+    const tab = e.target.closest('ul.nav-tabs a, .toggle-enlace, .border-line button');
+    if (tab && settings.rememberPlayer) {
+      // Guardar directamente el texto del tab clickado — sin depender de la clase "activa" del sitio
+      const key = tab.textContent.trim().split('\n')[0].trim();
+      if (key) {
+        _ext.storage.local.set({ ['aap_player_' + HOST.replace(/\./g, '_')]: key });
+        DBG('player guardado:', key);
+      }
+    }
   });
 
   // ════════════════════════════════════════════════════════════════════════════

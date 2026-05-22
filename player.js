@@ -233,15 +233,12 @@
     wrapperEl = document.createElement('div');
     wrapperEl.id = '_aap_wrapper';
     wrapperEl.style.cssText = `
-      position: absolute !important;
+      position: fixed !important;
       inset: 0 !important;
       pointer-events: none !important;
       z-index: 2147483640 !important;
       overflow: visible !important;
     `;
-    // Asegurar que root tiene position no-static
-    const cs = getComputedStyle(root);
-    if (cs.position === 'static') root.style.position = 'relative';
     root.appendChild(wrapperEl);
     return wrapperEl;
   }
@@ -305,7 +302,7 @@
         #no  { background:rgba(255,255,255,0.09); color:rgba(255,255,255,0.55); }
         #no:hover  { background:rgba(255,255,255,0.16); color:#fff; }
         #yes { background:#4F8EF7; color:#060d1f; }
-        #yes:hover { background:#00d4b8; }
+        #yes:hover { background:#7ab3fb; }
       </style>
       <div id="card">
         <div id="lbl">Siguiente episodio en</div>
