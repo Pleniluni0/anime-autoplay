@@ -6,12 +6,16 @@
 (function () {
   'use strict';
 
+  // Avisa a player.js (mismo mundo aislado del content script) de que este frame ya
+  // tiene relé propio, para que su relé genérico no duplique los mensajes.
+  window.__aapBridgeActive = true;
+
   // ── Reenviar mensajes de main.js hacia los iframes hijos ─────────────────
   window.addEventListener('message', (e) => {
     if (!e.data || e.data._aap !== true) return;
 
     // Mensajes que vienen de la página principal → reenviar a iframes hijos
-    if (e.data.type === 'SETTINGS' || e.data.type === 'PLAY_VIDEO' || e.data.type === 'UNMUTE') {
+    if (e.data.type === 'SETTINGS' || e.data.type === 'PLAY_VIDEO' || e.data.type === 'UNMUTE' || e.data.type === 'LOWER_VOLUME' || e.data.type === 'RESTORE_VOLUME' || e.data.type === 'SHORTCUT' || e.data.type === 'TOAST' || e.data.type === 'EXTEND_COUNTDOWN' || e.data.type === 'COUNTDOWN_TO') {
       document.querySelectorAll('iframe').forEach(f => {
         try { f.contentWindow.postMessage(e.data, '*'); } catch (_) {}
         // En caso de UNMUTE también enviamos comandos API a iframes Dailymotion/Vimeo,
@@ -30,7 +34,7 @@
     }
 
     // Mensajes que vienen de iframes hijos → reenviar a la página principal
-    if (['TRIGGER', 'PLAY_NOW', 'CANCELLED', 'STARTING', 'GET_SETTINGS'].includes(e.data.type)) {
+    if (['TRIGGER', 'PLAY_NOW', 'CANCELLED', 'STARTING', 'GET_SETTINGS', 'ADJUST_ENDING', 'FULLSCREEN_ENTERED', 'NEED_GESTURE', 'NIGHT_END', 'COUNTDOWN_TO'].includes(e.data.type)) {
       try { window.parent.postMessage(e.data, '*'); } catch (_) {}
       try { window.top.postMessage(e.data, '*'); } catch (_) {}
     }

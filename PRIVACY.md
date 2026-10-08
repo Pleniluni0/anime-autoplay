@@ -22,24 +22,15 @@ The only data stored by the Extension is **user preferences**, saved locally in 
 - Ending skip offset
 - Player/server memory preference
 - Auto fullscreen toggle
+- Interface language (Spanish / English)
+- Night mode settings (on/off and number of episodes before autoplay stops)
+- **Watch history**: for each series, the title and episode number taken from the page address, the address of that episode page, and the time it was recorded. It is saved only when the countdown finished and the Extension moved on to the next episode. It is shown in the Extension's popup, can be deleted per series or all at once from there, and keeps at most 100 series per website.
 
-This data is stored **solely on your device** and synced across your Chrome browsers **only through your Google account** if you have Chrome sync enabled. The Extension developer has no access to this data.
+The watch history is kept in `storage.local` and is **never synced or transmitted**. The remaining data is stored **solely on your device** and synced across your Chrome browsers **only through your Google account** if you have Chrome sync enabled. The Extension developer has no access to this data.
 
 ## Website Access
 
 The Extension runs only on websites you visit. It reads minimal page information (video elements, navigation buttons) solely to provide its functionality — detecting when an episode ends and offering to play the next one. It does not read, modify, or transmit the content of web pages beyond what is strictly necessary for its stated purpose.
-
-## Native Messaging Host (Optional)
-
-The Extension optionally supports a **separate native messaging host** (distributed independently via GitHub, not through the Chrome Web Store) that enables fully automatic fullscreen by simulating a system-level mouse click. This host:
-
-- Runs only on Windows
-- Is installed manually by the user
-- Is fully open source
-- Does **not** collect or transmit data
-- Only performs the actions requested by the Extension (mouse clicks at specified coordinates)
-
-The host is **not included** in the Chrome Web Store version of the Extension and must be installed separately by the user.
 
 ## Changes to This Policy
 
@@ -49,4 +40,4 @@ If this policy changes, the updated version will be posted here. Continued use o
 
 For questions about this privacy policy, please open an issue at the Extension's GitHub repository or contact the developer at the repository's listed contact address.
 
-*Last updated: 2025*
+*Last updated: October 2026*

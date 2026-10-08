@@ -17,7 +17,10 @@ Autoplay for anime sites — countdown, intro skip, fullscreen, and player memor
 - **Fullscreen toggle**: One-click fullscreen activation via a prominent overlay prompt.
 - **Auto-pause**: The countdown pauses when you switch tabs — never miss a moment.
 - **DNS prefetch & prefetch**: Preloads the next episode for faster navigation.
-- **Multi-monitor support**: Works correctly even with browser windows spanning multiple monitors.
+- **Keyboard shortcuts**: N (next episode), S (skip intro), C (cancel countdown), G (cut the countdown to 2 s), F (fullscreen), P (picture-in-picture), ← → (seek 5 s), + / − (adjust the ending skip).
+- **Night mode**: Choose how many more episodes to watch, then autoplay stops by itself — no episodes running all night if you fall asleep.
+- **Watch history**: The last episode you watched of each series, grouped by site. Only episodes that actually advanced after the countdown are recorded, so visiting a page by mistake never overwrites it. Stored locally.
+- **Spanish / English**: The interface follows your browser language and can be changed from the popup.
 
 ### 🎯 Supported Sites
 
@@ -26,6 +29,7 @@ Autoplay for anime sites — countdown, intro skip, fullscreen, and player memor
 - SeriesDonghua
 - MundoDonghua
 - DonghuaLife
+- JKAnime
 
 ### ▶️ How It Works
 
@@ -36,13 +40,9 @@ Autoplay for anime sites — countdown, intro skip, fullscreen, and player memor
 5. The video auto-plays. **Intro/opening** is skipped automatically (or via a button).
 6. Rinse and repeat. 🎬
 
-### 🔧 Optional: Fully Automatic Mode (Separate Installation)
-
-The Chrome Web Store version works with a single click per episode (the fullscreen prompt). For a **fully automatic** experience — zero clicks, automatic fullscreen — a companion native host is available as a **separate installation from GitHub**. It simulates a system-level click to satisfy Chrome's fullscreen policy. See the README on GitHub for installation instructions.
-
 ### 🔒 Privacy
 
-This extension collects **no data**. All settings are stored locally in your browser. No analytics, no tracking, no third-party services. Full privacy policy available in the repository.
+This extension collects **no data**. All settings and your watch history are stored locally in your browser. No analytics, no tracking, no third-party services. Full privacy policy available in the repository.
 
 ### 🆓 Open Source
 
@@ -52,7 +52,7 @@ MIT license. Source code available on GitHub.
 
 ## Keywords (for Store search)
 
-anime, autoplay, animeflv, animeav1, donghua, seriesdonghua, mundodonghua, donghualife, binge watch, countdown, intro skip, fullscreen, next episode, automatic
+anime, autoplay, animeflv, animeav1, donghua, seriesdonghua, mundodonghua, donghualife, jkanime, binge watch, countdown, intro skip, fullscreen, next episode, automatic
 
 ## Category
 

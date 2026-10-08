@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Anime AutoPlay",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "Autoplay for anime sites — countdown, intro skip, fullscreen, player memory.",
   "permissions": ["storage"],
   "background": {
@@ -12,7 +12,8 @@
     "*://*.animeflv.net/*",
     "*://*.seriesdonghua.com/*",
     "*://*.mundodonghua.com/*",
-    "*://*.donghualife.com/*"
+    "*://*.donghualife.com/*",
+    "*://*.jkanime.net/*"
   ],
   "content_scripts": [
     {
@@ -21,9 +22,10 @@
         "*://*.animeflv.net/*",
         "*://*.seriesdonghua.com/*",
         "*://*.mundodonghua.com/*",
-        "*://*.donghualife.com/*"
+        "*://*.donghualife.com/*",
+        "*://*.jkanime.net/*"
       ],
-      "js": ["main.js"],
+      "js": ["i18n.js", "main.js"],
       "run_at": "document_end"
     },
     {
@@ -45,9 +47,13 @@
         "*://*.mp4upload.com/*",
         "*://*.mega.nz/*",
         "*://*.upnshare.com/*",
-        "*://*.pdrain.com/*"
+        "*://*.pdrain.com/*",
+        "*://*.jkanime.net/*",
+        "*://*.vidhide.com/*",
+        "*://*.vidhidepro.com/*",
+        "*://*.vidhidevip.com/*"
       ],
-      "js": ["player.js"],
+      "js": ["i18n.js", "player.js"],
       "run_at": "document_idle",
       "all_frames": true
     }

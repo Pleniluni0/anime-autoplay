@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Host Anime Autoplay</title>
+  <title>Anime AutoPlay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -14,15 +14,24 @@
       background:#0f111a;
       color:#e8eaf0;
       width:300px;
+      max-height:600px;            /* tope de altura de un popup de Chrome */
+      display:flex; flex-direction:column;
       overflow:hidden;
     }
+
+    /* ── Scrollbar (misma en configuración, ayuda e historial) ── */
+    #screen-main, #screen-help, #screen-history { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.18) transparent; }
+    #screen-main::-webkit-scrollbar, #screen-help::-webkit-scrollbar, #screen-history::-webkit-scrollbar { width:6px; }
+    #screen-main::-webkit-scrollbar-track, #screen-help::-webkit-scrollbar-track, #screen-history::-webkit-scrollbar-track { background:transparent; }
+    #screen-main::-webkit-scrollbar-thumb, #screen-help::-webkit-scrollbar-thumb, #screen-history::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.18); border-radius:3px; }
+    #screen-main::-webkit-scrollbar-thumb:hover, #screen-help::-webkit-scrollbar-thumb:hover, #screen-history::-webkit-scrollbar-thumb:hover { background:rgba(79,142,247,0.6); }
 
     /* ── Header ── */
     .header {
       background:linear-gradient(135deg,rgba(79,142,247,0.15),rgba(79,142,247,0.04));
       border-bottom:1px solid rgba(79,142,247,0.18);
       padding:14px 18px 12px;
-      display:flex; align-items:center; gap:10px;
+      display:flex; align-items:center; gap:10px; flex-shrink:0;
     }
     .logo {
       width:32px; height:32px; background:#4F8EF7;
@@ -39,11 +48,55 @@
       cursor:pointer; flex-shrink:0; transition:all 0.2s;
       font-family:'Sora',sans-serif;
     }
+    .lang-select {
+      height:28px; border-radius:8px; margin-right:6px;
+      background:rgba(255,255,255,0.07); border:none; outline:none;
+      color:rgba(255,255,255,0.7); font-size:11px; font-weight:700;
+      font-family:'Sora',sans-serif; cursor:pointer; padding:0 4px; flex-shrink:0;
+    }
+    .lang-select option { background:#0b1020; color:#fff; }
     .help-btn:hover { background:rgba(79,142,247,0.2); color:#4F8EF7; }
 
     /* ── Screens ── */
-    #screen-main, #screen-help { display:flex; flex-direction:column; }
-    #screen-help { display:none; }
+    #screen-main, #screen-help, #screen-history { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; overflow-y:auto; }
+    #screen-help, #screen-history { display:none; }
+
+    /* ── Historial ── */
+    .hist-content { padding:14px 18px 18px; display:flex; flex-direction:column; gap:10px; }
+    .hist-hint { font-size:12px; font-weight:600; color:rgba(255,255,255,0.55); line-height:1.5; text-align:center; }
+    .hist-empty { font-size:12px; color:rgba(255,255,255,0.35); text-align:center; padding:22px 6px; line-height:1.5; }
+    .hist-domain { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:10px; overflow:hidden; }
+    .hist-domain > summary {
+      list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px;
+      padding:10px 12px; font-size:13px; font-weight:700; color:#e8eaf0;
+    }
+    .hist-domain > summary::-webkit-details-marker { display:none; }
+    .hist-domain > summary::before { content:'▸'; color:rgba(255,255,255,0.4); font-size:11px; transition:transform 0.15s; }
+    .hist-domain[open] > summary::before { transform:rotate(90deg); color:#4F8EF7; }
+    .hist-domain > summary:hover { background:rgba(79,142,247,0.08); }
+    .hist-host { font-size:10px; font-weight:400; color:rgba(255,255,255,0.3); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hist-count { flex-shrink:0; white-space:nowrap; font-size:10px; font-weight:700; color:#4F8EF7; background:rgba(79,142,247,0.14); border-radius:20px; padding:2px 8px; }
+    .hist-items { display:flex; flex-direction:column; border-top:1px solid rgba(255,255,255,0.06); }
+    .hist-item { display:flex; align-items:center; gap:6px; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .hist-item:last-child { border-bottom:none; }
+    .hist-open {
+      flex:1; min-width:0; text-align:left; background:none; border:none; cursor:pointer;
+      padding:9px 12px; color:inherit; font-family:inherit; display:flex; flex-direction:column; gap:2px;
+    }
+    .hist-open:hover { background:rgba(79,142,247,0.08); }
+    .hist-series { font-size:12px; font-weight:600; color:#e8eaf0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hist-meta { font-size:10px; color:rgba(255,255,255,0.4); }
+    .hist-meta b { color:#4F8EF7; font-weight:700; }
+    .hist-del {
+      width:22px; height:22px; margin-right:8px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+      background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.45); font-size:11px; font-family:inherit;
+    }
+    .hist-del:hover { background:rgba(240,80,80,0.2); color:#ff7a7a; }
+    .hist-clear {
+      align-self:center; margin-top:4px; background:none; border:1px solid rgba(255,255,255,0.12);
+      color:rgba(255,255,255,0.5); border-radius:8px; padding:6px 12px; font-size:11px; cursor:pointer; font-family:inherit;
+    }
+    .hist-clear:hover { border-color:rgba(240,80,80,0.5); color:#ff7a7a; }
 
     .content { padding:14px 18px; display:flex; flex-direction:column; gap:12px; }
 
@@ -124,7 +177,6 @@
     .help-content {
       padding:16px 18px 18px;
       display:flex; flex-direction:column; gap:14px;
-      max-height:420px; overflow-y:auto;
     }
     .help-back {
       display:flex; align-items:center; gap:8px;
@@ -169,10 +221,15 @@
   <div class="header">
     <div class="logo">▶</div>
     <div class="header-text">
-      <h1>Host Anime Autoplay</h1>
+      <h1>Anime AutoPlay</h1>
       <p></p>
     </div>
-    <button class="help-btn" id="help-toggle" title="Ayuda">?</button>
+    <select class="lang-select" id="lang-select" aria-label="Language">
+      <option value="es">ES</option>
+      <option value="en">EN</option>
+    </select>
+    <button class="help-btn" id="history-toggle" title="Historial" data-i18n-title="hist_title" style="margin-right:6px">🕘</button>
+    <button class="help-btn" id="help-toggle" title="Ayuda" data-i18n-title="help_title">?</button>
   </div>
 
   <!-- ══════════════════════════════════════════ -->
@@ -184,8 +241,8 @@
       <!-- Autoplay toggle -->
       <div class="row">
         <div class="row-info">
-          <label>Reproducción automática</label>
-          <span>Pasar al siguiente episodio</span>
+          <label data-i18n="pp1">Reproducción automática</label>
+          <span data-i18n="pp2">Pasar al siguiente episodio</span>
         </div>
         <label class="toggle">
           <input type="checkbox" id="autoplay-toggle">
@@ -196,23 +253,12 @@
       <div class="divider"></div>
 
       <!-- Siguiente episodio -->
-      <div class="section-label">Siguiente episodio</div>
-
-      <div class="row" id="row-remember-player">
-        <div class="row-info">
-          <label>Recordar reproductor</label>
-          <span>Usa el mismo servidor al pasar</span>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="remember-player-toggle">
-          <span class="slider"></span>
-        </label>
-      </div>
+      <div data-i18n="pp3" class="section-label">Siguiente episodio</div>
 
       <div class="row" id="row-autofs">
         <div class="row-info">
-          <label>Fullscreen al cargar</label>
-          <span>Overlay de pantalla completa al pasar</span>
+          <label data-i18n="pp4">Fullscreen al cargar</label>
+          <span data-i18n="pp5">Overlay de pantalla completa al pasar</span>
         </div>
         <label class="toggle">
           <input type="checkbox" id="autofs-toggle">
@@ -222,19 +268,31 @@
 
       <div class="divider"></div>
 
+      <!-- Countdown overlay toggle -->
+      <div class="row" id="row-countdown-overlay">
+        <div class="row-info">
+          <label data-i18n="pp6">Overlay de cuenta atrás</label>
+          <span data-i18n="pp7">Si se desactiva, pasa directo al siguiente</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="countdown-overlay-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
       <!-- Countdown -->
       <div class="slider-row" id="section-countdown">
         <div class="slider-header">
           <div class="row-info">
-            <label>Cuenta atrás</label>
-            <span>Tiempo antes de pasar</span>
+            <label data-i18n="pp8">Cuenta atrás</label>
+            <span data-i18n="pp9">Tiempo antes de pasar</span>
           </div>
           <div>
             <div class="slider-val" id="countdown-display">5</div>
-            <div class="slider-unit">segundos</div>
+            <div data-i18n="pp10" class="slider-unit">segundos</div>
           </div>
         </div>
-        <input type="range" id="countdown-slider" min="3" max="15" value="5" step="1">
+        <input type="range" id="countdown-slider" min="2" max="15" value="5" step="1">
       </div>
 
       <div class="divider"></div>
@@ -243,16 +301,16 @@
       <div class="slider-row" id="section-skip">
         <div class="slider-header">
           <div class="row-info">
-            <label>Saltar créditos / ending</label>
-            <span>Mostrar overlay antes del final</span>
+            <label data-i18n="pp11">Saltar créditos / ending</label>
+            <span data-i18n="pp12">Mostrar overlay antes del final</span>
           </div>
           <div>
             <div class="slider-val" id="skip-display">0</div>
-            <div class="slider-unit">segundos</div>
+            <div data-i18n="pp13" class="slider-unit">segundos</div>
           </div>
         </div>
         <input type="range" id="skip-slider" min="0" max="240" value="0" step="5">
-        <div class="note" id="skip-preview">Desactivado — aparece al terminar el vídeo</div>
+        <div data-i18n="pp14" class="note" id="skip-preview">Desactivado — aparece al terminar el vídeo</div>
       </div>
 
       <div class="divider"></div>
@@ -261,8 +319,8 @@
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div class="row">
           <div class="row-info">
-            <label>Saltar intro / opening</label>
-            <span>Salta al instante configurado</span>
+            <label data-i18n="pp15">Saltar intro / opening</label>
+            <span data-i18n="pp16">Salta al instante configurado</span>
           </div>
           <label class="toggle">
             <input type="checkbox" id="intro-toggle">
@@ -272,21 +330,22 @@
 
         <div id="intro-body" class="disabled-section">
           <div class="mode-pills">
-            <div class="pill" id="pill-manual">✋ Manual</div>
-            <div class="pill" id="pill-auto">⚡ Automático</div>
+            <div data-i18n="pp17" class="pill" id="pill-manual">✋ Manual</div>
+            <div data-i18n="pp18" class="pill" id="pill-auto">⚡ Auto</div>
+            <div data-i18n="pp19" class="pill" id="pill-speed">⏩ ×2</div>
           </div>
           <div class="time-inputs" style="margin-top:8px">
             <div class="time-field">
-              <label>DESDE</label>
+              <label data-i18n="pp20">DESDE</label>
               <input type="text" id="intro-from" placeholder="0:00" maxlength="7">
             </div>
             <div class="time-arrow">→</div>
             <div class="time-field">
-              <label>HASTA</label>
+              <label data-i18n="pp21">HASTA</label>
               <input type="text" id="intro-to" placeholder="1:30" maxlength="7">
             </div>
           </div>
-          <div class="intro-preview" id="intro-preview" style="margin-top:6px">
+          <div data-i18n="pp22" class="intro-preview" id="intro-preview" style="margin-top:6px">
             Introduce los tiempos de la intro
           </div>
         </div>
@@ -294,7 +353,50 @@
 
       <div class="divider"></div>
 
-      <div class="status" id="status-text">Cargando...</div>
+      <!-- Modo noche -->
+      <div class="row" id="row-night">
+        <div class="row-info">
+          <label data-i18n="night_title">Modo noche</label>
+          <span data-i18n="night_sub">Se detiene tras unos episodios</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="night-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-row" id="section-night">
+        <div class="slider-header">
+          <div class="row-info">
+            <label data-i18n="night_count">Episodios más</label>
+            <span data-i18n="night_count_sub">Después del actual, luego para</span>
+          </div>
+          <div>
+            <div class="slider-val" id="night-display">3</div>
+            <div class="slider-unit" data-i18n="night_unit">episodios</div>
+          </div>
+        </div>
+        <input type="range" id="night-slider" min="1" max="10" value="3" step="1">
+        <div class="note" id="night-status"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Atajos de teclado -->
+      <div class="row" id="row-keyboard">
+        <div class="row-info">
+          <label data-i18n="pp23">Atajos de teclado</label>
+          <span>N, S, C, G, Esc, F, P, ← →</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="keyboard-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div data-i18n="pp24" class="status" id="status-text">Cargando...</div>
     </div>
   </div>
 
@@ -305,7 +407,7 @@
     <div class="help-content">
 
       <div class="help-section">
-        <div class="help-title">Sitios probados</div>
+        <div data-i18n="pp25" class="help-title">Sitios probados</div>
         <div class="sites-list">
           <span class="site-tag">AnimeAV1</span>
           <span class="site-tag">AnimeFLV</span>
@@ -316,8 +418,8 @@
       </div>
 
       <div class="help-section">
-        <div class="help-title">Reproducción automática</div>
-        <div class="help-text">
+        <div data-i18n="pp26" class="help-title">Reproducción automática</div>
+        <div data-i18n-html="pp27" class="help-text">
           Al terminar un episodio aparece un <b>contador</b> con cuenta atrás.
           Pulsa <b>Ver ahora</b> para saltar inmediatamente o <b>Cancelar</b> para quedarte.
           Si no haces nada, pasa solo al siguiente episodio.
@@ -325,75 +427,92 @@
       </div>
 
       <div class="help-section">
-        <div class="help-title">Recordar reproductor</div>
-        <div class="help-text">
+        <div data-i18n="pp28" class="help-title">Recordar reproductor</div>
+        <div data-i18n="pp29" class="help-text">
           Guarda qué servidor estás usando (Tamamo, Voe, Daily…).
           Al pasar al siguiente episodio selecciona ese servidor automáticamente.
         </div>
       </div>
 
       <div class="help-section">
-        <div class="help-title">Modo automático</div>
-        <div class="help-text">
-          Al pasar de episodio, el host nativo simula un <b>click real</b> en el centro de la pantalla.
-          Esto activa el reproductor y la pantalla completa <b>sin que tengas que tocar nada</b>.
-        </div>
-        <div class="help-tip">
-          <b>Requiere activación del host:</b> el script Python debe estar instalado y registrado en Windows.
-          Ejecuta <b>install_host.ps1</b> con el ID de la extensión una sola vez para activarlo.<br><br>
-          Si el host no está disponible, el overlay seguirá apareciendo pero necesitarás pulsar tú manualmente.
-        </div>
+        <div class="help-title" data-i18n="help_fs_title">Pantalla completa</div>
+        <div class="help-text" data-i18n-html="help_fs_text">Al pasar de episodio aparece un overlay: púlsalo <b>una vez</b> para activar el reproductor y la pantalla completa.</div>
       </div>
 
       <div class="help-section">
-        <div class="help-title">Activar el host nativo</div>
-        <div class="help-text">
-          <b>1.</b> Instala la dependencia: <b>pip install pyautogui</b><br>
-          <b>2.</b> Copia el <b>ID</b> de la extensión desde <b>chrome://extensions/</b><br>
-          <b>3.</b> Ejecuta en PowerShell desde la carpeta <b>host\</b>:<br>
-        </div>
-        <div class="help-tip" style="margin-top:4px;font-family:monospace">
-          .\install_host.ps1 -ExtensionId "tu_id_aqui"
-        </div>
-        <div class="help-text" style="margin-top:4px">
-          <b>4.</b> Reinicia Chrome. Listo.
-        </div>
-      </div>
-
-      <div class="help-section">
-        <div class="help-title">Saltar créditos / ending</div>
-        <div class="help-text">
+        <div data-i18n="pp36" class="help-title">Saltar créditos / ending</div>
+        <div data-i18n-html="pp37" class="help-text">
           El overlay de cuenta atrás aparece <b>N segundos antes</b> del final del vídeo.
           Desliza a la <b>derecha</b> para que aparezca más <b>cerca del final</b>,
           a la <b>izquierda</b> para que aparezca más <b>lejos</b>.
           Ponlo a <b>0</b> para que aparezca cuando termine el vídeo.
+          Pulsa <b>+</b> / <b>-</b> en cualquier momento para sumar o restar 5s a este valor
+          (funciona siempre, no solo con la cuenta atrás en pantalla); si además hay una
+          cuenta atrás activa, <b>+</b> también le suma 5s sobre la marcha.
         </div>
       </div>
 
       <div class="help-section">
-        <div class="help-title">Saltar intro / opening</div>
-        <div class="help-text">
+        <div data-i18n="pp38" class="help-title">Saltar intro / opening</div>
+        <div data-i18n-html="pp39" class="help-text">
           Configura los tiempos de inicio y fin de la intro (ej: <b>0:00 → 1:30</b>).
         </div>
-        <div class="help-text" style="margin-top:4px">
+        <div data-i18n-html="pp40" class="help-text" style="margin-top:4px">
           • <b>Manual:</b> aparece un botón "⏩ Saltar intro" sobre el vídeo.<br>
-          • <b>Automático:</b> salta solo sin mostrar ningún botón.
+          • <b>Automático:</b> salta solo sin mostrar ningún botón.<br>
+          • <b>×2 Velocidad:</b> reproduce la intro al doble de velocidad y luego vuelve a 1×.
         </div>
-        <div class="help-tip" style="margin-top:6px">
+        <div data-i18n-html="pp41" class="help-tip" style="margin-top:6px">
           <b>Consejo:</b> Los tiempos son globales para todos los episodios. Si la intro cambia de duración entre temporadas, ajústalo aquí.
         </div>
       </div>
 
       <div class="help-section">
-        <div class="help-title">Cuenta atrás</div>
-        <div class="help-text">
-          Segundos que espera antes de pasar al siguiente episodio. Entre <b>3 y 15 segundos</b>.
+        <div data-i18n="pp42" class="help-title">Atajos de teclado</div>
+        <div data-i18n-html="pp43" class="help-text">
+          <b>N</b> — Siguiente episodio &nbsp;|&nbsp; <b>S</b> — Saltar intro<br>
+          <b>C</b> — Cancelar cuenta atrás &nbsp;|&nbsp; <b>G</b> — Cuenta atrás a 2s &nbsp;|&nbsp; <b>Esc</b> — Cancelar (reentra FS)<br>
+          <b>F</b> — Pantalla completa &nbsp;|&nbsp; <b>P</b> — Picture-in-Picture<br>
+          <b>← →</b> — Retroceder / Adelantar 5s<br>
+          <b>+</b> — Sumar 5s a "Saltar créditos / ending" (y también 5s a la cuenta atrás que esté activa en pantalla, si hay una) &nbsp;|&nbsp; <b>-</b> — Restar 5s a "Saltar créditos / ending"
+        </div>
+        <div data-i18n-html="pp44" class="help-tip" style="margin-top:6px">
+          <b>Nota:</b> Los atajos funcionan cuando el reproductor tiene el foco. Si no responden, haz click en el vídeo primero.
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title" data-i18n="help_night_title">Modo noche</div>
+        <div class="help-text" data-i18n-html="help_night_text">Para ver de noche sin que el autoplay siga toda la madrugada.</div>
+      </div>
+
+      <div class="help-section">
+        <div class="help-title" data-i18n="help_hist_title">Historial</div>
+        <div class="help-text" data-i18n-html="help_hist_text">Guarda el último episodio visto de cada serie, agrupado por sitio.</div>
+      </div>
+
+      <div class="help-section">
+        <div data-i18n="pp45" class="help-title">Cuenta atrás</div>
+        <div data-i18n-html="pp46" class="help-text">
+          Si el overlay está activo, espera entre <b>2 y 15 segundos</b> antes de pasar. Si lo desactivas, salta directo al siguiente episodio.
         </div>
       </div>
 
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PANTALLA DE HISTORIAL                      -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="screen-history">
+    <div class="hist-content">
+      <div class="hist-hint" data-i18n="hist_hint">Último episodio visto de cada serie.</div>
+      <div id="hist-list"></div>
+      <button class="hist-clear" id="hist-clear" data-i18n="hist_clear">Borrar historial</button>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
