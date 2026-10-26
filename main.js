@@ -1739,7 +1739,20 @@
     setTimeout(reenter, 150);
     setTimeout(reenter, 350);
   }
+  // ¿El foco está en un campo de escritura (comentarios, buscador…)? Si es así,
+  // los atajos NO deben actuar ni tragarse la tecla. Cubre INPUT/TEXTAREA/SELECT,
+  // elementos contenteditable y cualquier nodo dentro de uno.
+  function isTypingTarget(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (el.isContentEditable) return true;
+    try { if (el.closest && el.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')) return true; } catch (_) {}
+    return false;
+  }
+
   document.addEventListener('keydown', (e) => {
+    if (isTypingTarget(e.target)) return;
     if (mainCountdownActive) {
       if (e.key === 'c' || e.key === 'C') {
         e.preventDefault(); e.stopImmediatePropagation();
@@ -1762,9 +1775,6 @@
     // Se ignoran si el usuario está escribiendo en un campo de texto de la página.
     if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd' ||
         e.key === '-' || e.code === 'NumpadSubtract') {
-      const t = e.target;
-      const isTyping = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
-      if (isTyping) return;
       e.preventDefault(); e.stopImmediatePropagation();
       applyEndingShortcut((e.key === '-' || e.code === 'NumpadSubtract') ? -5 : 5);
     }
@@ -1781,7 +1791,7 @@
   // ════════════════════════════════════════════════════════════════════════════
   document.addEventListener('keydown', (e) => {
     if (!settings.keyboardShortcuts) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (isTypingTarget(e.target)) return;
 
     switch (e.key.toLowerCase()) {
       case 'g':

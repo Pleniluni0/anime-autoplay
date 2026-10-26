@@ -1047,7 +1047,20 @@
     setTimeout(reenter, 150);
     setTimeout(reenter, 350);
   }
+  // ¿El foco está en un campo de escritura (comentarios, buscador…)? Si es así,
+  // los atajos NO deben actuar ni tragarse la tecla. Cubre INPUT/TEXTAREA/SELECT,
+  // elementos contenteditable y cualquier nodo dentro de uno.
+  function isTypingTarget(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (el.isContentEditable) return true;
+    try { if (el.closest && el.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')) return true; } catch (_) {}
+    return false;
+  }
+
   document.addEventListener('keydown', (e) => {
+    if (isTypingTarget(e.target)) return;
     if (!countdownActive) return;
     if (e.key === 'c' || e.key === 'C') {
       e.preventDefault(); e.stopImmediatePropagation();
@@ -1065,7 +1078,7 @@
   // ══════════════════════════════════════════════════════════════════════════════
   document.addEventListener('keydown', (e) => {
     if (typeof S === 'undefined' || !S.keyboardShortcuts) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (isTypingTarget(e.target)) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     if (e.key === '+' || e.key === '-' || e.code === 'NumpadAdd' || e.code === 'NumpadSubtract') {
